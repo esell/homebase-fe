@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>Check out my plants</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="dashboard.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">PLANTS!!!</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="index.html">Overview</a></li>
+            <li><a href="history.html">History</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-sidebar">
+            <li class="active"><a href="index.html">Overview <span class="sr-only">(current)</span></a></li>
+            <li><a href="history.html">History</a></li>
+          </ul>
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+          <h1 class="page-header">Current</h1>
+
+          <div class="row placeholders">
+            <div class="col-xs-6 col-sm-3 placeholder">
+              <svg id="fillgauge1" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail"></svg>
+              <h4><span id="pot1_name" style="font-weight:bold;"></span></h4>
+              <span class="text-muted">last update:<span id="pot1_update"></span></span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              <svg id="fillgauge2" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail"></svg>
+              <h4><span id="pot2_name" style="font-weight:bold;"></span></h4>
+              <span class="text-muted">last update:<span id="pot2_update"></span></span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              <svg id="fillgauge3" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail"></svg>
+              <h4><span id="pot3_name" style="font-weight:bold;"></span></h4>
+              <span class="text-muted">last update:<span id="pot3_update"></span></span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="jquery.min.js"><\/script>')</script>
+    <script src="bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="ie10-viewport-bug-workaround.js"></script>
+<script src="https://d3js.org/d3.v3.min.js" language="JavaScript"></script>
+<script src="liquidFillGauge.js" language="JavaScript"></script>
+<script language="JavaScript">
+
+    var config1 = liquidFillGaugeDefaultSettings();
+    config1.circleColor = "#6DA398";
+    config1.textColor = "#0E5144";
+    config1.waveTextColor = "#6DA398";
+    config1.waveColor = "#246D5F";
+    config1.circleThickness = 0.2;
+    config1.textVertPosition = 0.2;
+    config1.waveAnimateTime = 1000;
+    config1.displayPercent = false;
+    config1.circleThickness = 0.1;
+    config1.maxValue = 1024;
+    var gauge1 = loadLiquidFillGauge("fillgauge1", 0, config1);
+
+    var config2 = liquidFillGaugeDefaultSettings();
+    config2.circleColor = "#6DA398";
+    config2.textColor = "#0E5144";
+    config2.waveTextColor = "#6DA398";
+    config2.waveColor = "#246D5F";
+    config2.circleThickness = 0.2;
+    config2.textVertPosition = 0.2;
+    config2.waveAnimateTime = 1000;
+    config2.displayPercent = false;
+    config2.circleThickness = 0.1;
+    config2.maxValue = 1024;
+    var gauge2 = loadLiquidFillGauge("fillgauge2", 0, config2);
+
+    var config3 = liquidFillGaugeDefaultSettings();
+    config3.circleColor = "#6DA398";
+    config3.textColor = "#0E5144";
+    config3.waveTextColor = "#6DA398";
+    config3.waveColor = "#246D5F";
+    config3.circleThickness = 0.2;
+    config3.textVertPosition = 0.2;
+    config3.waveAnimateTime = 1000;
+    config3.displayPercent = false;
+    config3.circleThickness = 0.1;
+    config3.maxValue = 1024;
+    var gauge3 = loadLiquidFillGauge("fillgauge3", 0, config3);
+
+    function goGet(url) {
+        var myHeaders = new Headers();
+        myHeaders.append('Content-Type', 'application/json;');
+        var myInit = {
+            method: 'GET',
+            headers: myHeaders,
+            cache: 'no-cache'
+        };
+        return fetch(url, myInit).then(function (response) {
+            return response.json();
+        }).catch(function (err) {
+
+            console.log("ERROR: " + err);
+        });
+    }
+
+    function getSoilMoisture(device, gauge) {
+        goGet("https://esell-iot.azurewebsites.net/api/SoilCurrent?code=5XRuUaAN45m8q8UM8NeZipu7zLgEWX/7FzxmBPYMMUX9qyW5u/U8fQ==&device=" + device).then(function (response) {
+            //console.log(response);
+            document.getElementById(device + "_name").innerHTML = response.deviceid;
+            gauge.update(response.moisture);
+            var localDate = new Date(response.utc);
+            document.getElementById(device + "_update").innerHTML = localDate.toDateString() + " " + localDate.getHours() + ":" + localDate.getMinutes();
+        })
+    }
+
+    getSoilMoisture("pot1", gauge1);
+    getSoilMoisture("pot2", gauge2);
+    getSoilMoisture("pot3", gauge3);
+
+
+</script>
+  </body>
+</html>
