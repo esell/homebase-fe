@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Check out my temps</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="dashboard.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false"
+                    aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+                <a class="navbar-brand" href="#">PLANTS!!!</a>
+            </div>
+            <div id="navbar" class="navbar-collapse collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="plantoverview.html">Plant Overview</a></li>
+                    <li><a href="planthistory.html">Plant History</a></li>
+                    <li><a href="tempoverview.html">Temp Overview</a></li>
+                    <li><a href="temphistory.html">Temp History</a></li>
+
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-3 col-md-2 sidebar">
+                <ul class="nav nav-sidebar">
+                    <li><a href="plantoverview.html">Plant Overview</a></li>
+                    <li><a href="planthistory.html">Plant History <span class="sr-only">(current)</span></a></li>
+                    <li><a href="tempoverview.html">Temp Overview</a></li>
+                    <li class="active"><a href="temphistory.html">Temp History</a></li>
+                </ul>
+            </div>
+            <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+                <h1 class="page-header">History</h1>
+
+                <div class="row">
+                    <div class="col-xs-12 col-md-10">
+                        <h4>Garage</h4>
+                        <div id="garage_graph" align="center"></div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-12 col-md-10">
+                        <h4>Porch</h4>
+                        <div id="porch_graph" align="center"></div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script>
+        window.jQuery || document.write('<script src="jquery.min.js"><\/script>')
+    </script>
+    <script src="bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="ie10-viewport-bug-workaround.js"></script>
+    <script src="https://d3js.org/d3.v3.min.js" language="JavaScript"></script>
+    <script language="JavaScript">
+        function getTempGraph(device) {
+            // var margin = { top: 30, right: 20, bottom: 70, left: 50 },
+            var margin = { top: 30, right: 20, bottom: 70, left: 50 },
+                width = 800 - margin.left - margin.right,
+                height = 270 - margin.top - margin.bottom;
+
+            var parseDate = d3.time.format.utc("%Y-%m-%dT%H:%M:%S").parse;
+            //var parseDate = formatDateParser.parse;
+
+            // Set the ranges
+            var x = d3.time.scale().range([0, width]);
+            var y0 = d3.scale.linear().range([height, 0]);
+            var y1 = d3.scale.linear().range([height, 0]);
+
+            // Define the axes
+            var xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(d3.time.hour, 12);
+            var yAxisLeft = d3.svg.axis().scale(y0).orient("left").ticks(10);
+            var yAxisRight = d3.svg.axis().scale(y1).orient("left").ticks(10);
+
+            // Define line 1
+            var valueline = d3.svg.line()
+                .x(function (d) {
+                    return x(d.sampleDate);
+                })
+                .y(function (d) {
+                    return y0(d.temp);
+                });
+
+            // Define line 2
+            var valueline2 = d3.svg.line()
+                .x(function (d) {
+                    return x(d.sampleDate);
+                })
+                .y(function (d) {
+                    return y1(d.humidity);
+                });
+
+            // Adds the svg canvas
+            var svg = d3.select("#" + device + "_graph")
+                .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform",
+                "translate(" + margin.left + "," + margin.top + ")");
+
+
+            // Get the data
+            d3.json("https://esell-iot.azurewebsites.net/api/TempHistory?code=u9XVUjzA0hpVtj5WuKyZjmWlnEBbGAIqagtU5gfbupcxRv56SlAgKQ==&device=" + device, function (error, data) {
+                data.forEach(function (d) {
+                    //var localDate = dateFormat(Date(d.sampleDate), "isoDateTime");
+                    //var parsedLocalDate = parseDate(localDate);
+                    //console.log("parseDate: " + d.sampleDate);
+                    //console.log("raw: " + d.sampleDate);
+                    //console.log("pre assign: " + parseDate(d.sampleDate)); 
+                    d.sampleDate = parseDate(d.sampleDate);
+                    //console.log("parseDate: " + d.sampleDate);
+                    //console.log("local: " + parsedLocalDate);
+                    d.temp = +d.temp;
+                    d.humidity = +d.humidity;
+                });
+
+                // Scale the range of the data
+                x.domain(d3.extent(data, function (d) {
+                    return d.sampleDate;
+                }));
+                y0.domain([0, d3.max(data, function (d) {
+                    return d.temp;
+                })]);
+                y1.domain([0, d3.max(data, function (d) {
+                    return d.humidity;
+                })]);
+
+                // Add the valueline path.
+                svg.append("path")
+                    .attr("class", "line")
+                    .attr("d", valueline(data));
+
+                // Add the valueline2 path.
+                svg.append("path")
+                    .style("stroke", "red")
+                    .attr("d", valueline2(data));
+
+                // Add the X Axis
+                svg.append("g")
+                    .attr("class", "x axis")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(xAxis)
+                    .selectAll("text")
+                    .style("text-anchor", "end")
+                    .attr("dx", "-.8em")
+                    .attr("dy", ".15em")
+                    .attr("transform", function (d) {
+                        return "rotate(-65)"
+                    });
+                // Add the Y Axis
+                svg.append("g")
+                    .attr("class", "y axis")
+                    .style("fill", "steelblue")
+                    .call(yAxisLeft);
+
+                svg.append("g")
+                    .attr("class", "y axis")
+                    .attr("transform", "translate(" + width + " ,0)")
+                    .style("fill", "red")
+                    .call(yAxisRight);
+
+                // line labels
+                svg.append("text")
+                    .attr("transform", "translate(" + (width + 3) + "," + y0(data[0].temp) + ")")
+                    .attr("dy", ".35em")
+                    .attr("text-anchor", "start")
+                    .style("fill", "steelblue")
+                    .text("T");
+
+                svg.append("text")
+                    .attr("transform", "translate(" + (width + 3) + "," + y1(data[0].humidity) + ")")
+                    .attr("dy", ".35em")
+                    .attr("text-anchor", "start")
+                    .style("fill", "red")
+                    .text("H");
+
+            });
+        }
+
+        getTempGraph("garage");
+        getTempGraph("porch");
+
+    </script>
+</body>
+
+</html>

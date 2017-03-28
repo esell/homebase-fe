@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Check out my plants</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="bootstrap.min.css" rel="stylesheet">
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <link href="dashboard.css" rel="stylesheet">
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+
+  <nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false"
+          aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+        <a class="navbar-brand" href="#">PLANTS!!!</a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="plantoverview.html">Plant Overview</a></li>
+          <li><a href="planthistory.html">Plant History</a></li>
+          <li><a href="tempoverview.html">Temp Overview</a></li>
+          <li><a href="temphistory.html">Temp History</a></li>
+
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-sm-3 col-md-2 sidebar">
+        <ul class="nav nav-sidebar">
+          <li><a href="plantoverview.html">Plant Overview</a></li>
+          <li class="active"><a href="planthistory.html">Plant History <span class="sr-only">(current)</span></a></li>
+          <li><a href="tempoverview.html">Temp Overview</a></li>
+          <li><a href="temphistory.html">Temp History</a></li>
+        </ul>
+      </div>
+      <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+        <h1 class="page-header">History</h1>
+
+        <div class="row">
+          <div class="col-xs-12 col-md-10">
+            <h4>Pot 1</h4>
+            <div id="pot1_graph" align="center"></div>
+
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-12 col-md-10 ">
+            <h4>Pot 2</h4>
+            <div id="pot2_graph" align="center"></div>
+
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-12 col-md-10 ">
+            <h4>Pot 3</h4>
+            <div id="pot3_graph" align="center"></div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  </div>
+
+  <!-- Bootstrap core JavaScript
+    ================================================== -->
+  <!-- Placed at the end of the document so the pages load faster -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script>
+    window.jQuery || document.write('<script src="jquery.min.js"><\/script>')
+  </script>
+  <script src="bootstrap.min.js"></script>
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <script src="ie10-viewport-bug-workaround.js"></script>
+  <script src="https://d3js.org/d3.v3.min.js" language="JavaScript"></script>
+  <script language="JavaScript">
+    function getSoilGraph(device) {
+
+      var margin = { top: 30, right: 20, bottom: 70, left: 50 },
+        width = 800 - margin.left - margin.right,
+        height = 270 - margin.top - margin.bottom;
+
+      var parseDate = d3.time.format.utc("%Y-%m-%dT%H:%M:%S").parse;
+
+      // Set the ranges
+      var x = d3.time.scale().range([0, width]);
+      var y = d3.scale.linear().range([height, 0]);
+
+      // Define the axes
+      var xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(d3.time.hour, 12);
+      var yAxis = d3.svg.axis().scale(y).orient("left").ticks(10);
+
+      // Define the line
+      var valueline = d3.svg.line()
+        .x(function (d) {
+          return x(d.sampleDate);
+        })
+        .y(function (d) {
+          return y(d.moistureLevel);
+        });
+
+      // Adds the svg canvas
+      var svg = d3.select("#" + device + "_graph")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform",
+        "translate(" + margin.left + "," + margin.top + ")");
+
+
+      // Get the data
+      d3.json("https://esell-iot.azurewebsites.net/api/SoilHistory?code=Iih9H8efk0QZhkOtiV/b245mzrnOdx9f8ctYYafvkMKdnPSaHNMhuA==&device=" + device, function (error, data) {
+        data.forEach(function (d) {
+          d.sampleDate = parseDate(d.sampleDate);
+          d.moistureLevel = +d.moistureLevel;
+        });
+
+        // Scale the range of the data
+        x.domain(d3.extent(data, function (d) {
+          return d.sampleDate;
+        }));
+        y.domain([0, d3.max(data, function (d) {
+          return d.moistureLevel;
+        })]);
+
+        // Add the valueline path.
+        svg.append("path")
+          .attr("class", "line")
+          .attr("d", valueline(data));
+
+        // Add the X Axis
+        svg.append("g")
+          .attr("class", "x axis")
+          .attr("transform", "translate(0," + height + ")")
+          .call(xAxis)
+          .selectAll("text")
+          .style("text-anchor", "end")
+          .attr("dx", "-.8em")
+          .attr("dy", ".15em")
+          .attr("transform", function (d) {
+            return "rotate(-65)"
+          });
+        // Add the Y Axis
+        svg.append("g")
+          .attr("class", "y axis")
+          .call(yAxis);
+
+      });
+    }
+
+    getSoilGraph("pot1");
+    getSoilGraph("pot2");
+    getSoilGraph("pot3");
+
+  </script>
+</body>
+
+</html>

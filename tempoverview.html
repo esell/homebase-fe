@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+	<meta name="description" content="">
+	<meta name="author" content="">
+
+	<title>Check out my temps</title>
+
+	<!-- Bootstrap core CSS -->
+	<link href="bootstrap.min.css" rel="stylesheet">
+
+	<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+	<link href="ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+	<!-- Custom styles for this template -->
+	<link href="dashboard.css" rel="stylesheet">
+
+	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+	<!--[if lt IE 9]>
+	    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+	    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+	<![endif]-->
+</head>
+
+<body>
+
+	<nav class="navbar navbar-inverse navbar-fixed-top">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false"
+				 aria-controls="navbar">
+			<span class="sr-only">Toggle navigation</span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+		    </button>
+				<a class="navbar-brand" href="#">PLANTS!!!</a>
+			</div>
+			<div id="navbar" class="navbar-collapse collapse">
+				<ul class="nav navbar-nav navbar-right">
+					<li><a href="plantoverview.html">Plant Overview</a></li>
+					<li><a href="planthistory.html">Plant History</a></li>
+					<li><a href="tempoverview.html">Temp Overview</a></li>
+					<li><a href="temphistory.html">Temp History</a></li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-sm-3 col-md-2 sidebar">
+				<ul class="nav nav-sidebar">
+					<li><a href="plantoverview.html">Plant Overview <span class="sr-only">(current)</span></a></li>
+					<li><a href="planthistory.html">Plant History</a></li>
+					<li class="active"><a href="tempoverview.html">Temp Overview</a></li>
+					<li><a href="temphistory.html">Temp History</a></li>
+				</ul>
+			</div>
+			<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+				<h1 class="page-header">Current</h1>
+
+				<div class="row placeholders">
+					<div class="col-xs-6 col-sm-3 placeholder">
+						<div id="garage_gauge"></div>
+						<h4><span id="garage_name" style="font-weight:bold;"></span></h4>
+						<span class="text-muted">last update:<span id="garage_update"></span></span>
+					</div>
+
+					<div class="col-xs-6 col-sm-3 placeholder">
+						<div id="porch_gauge"></div>
+						<h4><span id="porch_name" style="font-weight:bold;"></span></h4>
+						<span class="text-muted">last update:<span id="porch_update"></span></span>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+
+	<!-- Bootstrap core JavaScript
+     ================================================== -->
+	<!-- Placed at the end of the document so the pages load faster -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+	<script>
+		window.jQuery || document.write('<script src="jquery.min.js"><\/script>')
+	</script>
+	<script src="bootstrap.min.js"></script>
+	<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+	<script src="ie10-viewport-bug-workaround.js"></script>
+	<script src="https://d3js.org/d3.v3.min.js" language="JavaScript"></script>
+	<script>
+		function goGet(url) {
+			var myHeaders = new Headers();
+			myHeaders.append('Content-Type', 'application/json;');
+			var myInit = {
+				method: 'GET',
+				headers: myHeaders,
+				cache: 'no-cache'
+			};
+			return fetch(url, myInit).then(function (response) {
+				return response.json();
+			}).catch(function (err) {
+
+				console.log("ERROR: " + err);
+			});
+		}
+
+
+
+
+		function buildTherm(device, temp) {
+			/* thermometer stuff */
+			var width = 175,
+				height = 240,
+				maxTemp = 120,
+				minTemp = 0,
+				currentTemp = temp;
+
+			var bottomY = height - 5,
+				topY = 5,
+				bulbRadius = 20,
+				tubeWidth = 21.5,
+				tubeBorderWidth = 1,
+				mercuryColor = "rgb(230,0,0)",
+				innerBulbColor = "rgb(230, 200, 200)"
+			tubeBorderColor = "#999999";
+
+			var bulb_cy = bottomY - bulbRadius,
+				bulb_cx = width / 2,
+				top_cy = topY + tubeWidth / 2;
+
+
+			var svg = d3.select("#" + device + "_gauge")
+				.append("svg")
+				.attr("width", width)
+				.attr("height", height);
+
+
+			var defs = svg.append("defs");
+
+			// Define the radial gradient for the bulb fill colour
+			var bulbGradient = defs.append("radialGradient")
+				.attr("id", "bulbGradient")
+				.attr("cx", "50%")
+				.attr("cy", "50%")
+				.attr("r", "50%")
+				.attr("fx", "50%")
+				.attr("fy", "50%");
+
+			bulbGradient.append("stop")
+				.attr("offset", "0%")
+				.style("stop-color", innerBulbColor);
+
+			bulbGradient.append("stop")
+				.attr("offset", "90%")
+				.style("stop-color", mercuryColor);
+
+
+
+
+			// Circle element for rounded tube top
+			svg.append("circle")
+				.attr("r", tubeWidth / 2)
+				.attr("cx", width / 2)
+				.attr("cy", top_cy)
+				.style("fill", "#FFFFFF")
+				.style("stroke", tubeBorderColor)
+				.style("stroke-width", tubeBorderWidth + "px");
+
+
+			// Rect element for tube
+			svg.append("rect")
+				.attr("x", width / 2 - tubeWidth / 2)
+				.attr("y", top_cy)
+				.attr("height", bulb_cy - top_cy)
+				.attr("width", tubeWidth)
+				.style("shape-rendering", "crispEdges")
+				.style("fill", "#FFFFFF")
+				.style("stroke", tubeBorderColor)
+				.style("stroke-width", tubeBorderWidth + "px");
+
+
+			// White fill for rounded tube top circle element
+			// to hide the border at the top of the tube rect element
+			svg.append("circle")
+				.attr("r", tubeWidth / 2 - tubeBorderWidth / 2)
+				.attr("cx", width / 2)
+				.attr("cy", top_cy)
+				.style("fill", "#FFFFFF")
+				.style("stroke", "none")
+
+
+
+			// Main bulb of thermometer (empty), white fill
+			svg.append("circle")
+				.attr("r", bulbRadius)
+				.attr("cx", bulb_cx)
+				.attr("cy", bulb_cy)
+				.style("fill", "#FFFFFF")
+				.style("stroke", tubeBorderColor)
+				.style("stroke-width", tubeBorderWidth + "px");
+
+
+			// Rect element for tube fill colour
+			svg.append("rect")
+				.attr("x", width / 2 - (tubeWidth - tubeBorderWidth) / 2)
+				.attr("y", top_cy)
+				.attr("height", bulb_cy - top_cy)
+				.attr("width", tubeWidth - tubeBorderWidth)
+				.style("shape-rendering", "crispEdges")
+				.style("fill", "#FFFFFF")
+				.style("stroke", "none");
+
+
+			// Scale step size
+			var step = 10;
+
+			// Determine a suitable range of the temperature scale
+			var domain = [
+				step * Math.floor(minTemp / step),
+				step * Math.ceil(maxTemp / step)
+			];
+
+			if (minTemp - domain[0] < 0.66 * step)
+				domain[0] -= step;
+
+			if (domain[1] - maxTemp < 0.66 * step)
+				domain[1] += step;
+
+
+			// D3 scale object
+			var scale = d3.scale.linear()
+				.range([bulb_cy - bulbRadius / 2 - 8.5, top_cy])
+				.domain(domain);
+
+
+			// Max and min temperature lines
+			[minTemp, maxTemp].forEach(function (t) {
+
+				var isMax = (t == maxTemp),
+					label = (isMax ? "max" : "min"),
+					textCol = (isMax ? "rgb(230, 0, 0)" : "rgb(0, 0, 230)"),
+					textOffset = (isMax ? -4 : 4);
+
+				svg.append("line")
+					.attr("id", label + "Line")
+					.attr("x1", width / 2 - tubeWidth / 2)
+					.attr("x2", width / 2 + tubeWidth / 2 + 22)
+					.attr("y1", scale(t))
+					.attr("y2", scale(t))
+					.style("stroke", tubeBorderColor)
+					.style("stroke-width", "1px")
+					.style("shape-rendering", "crispEdges");
+
+				svg.append("text")
+					.attr("x", width / 2 + tubeWidth / 2 + 2)
+					.attr("y", scale(t) + textOffset)
+					.attr("dy", isMax ? null : "0.75em")
+					.text(label)
+					.style("fill", textCol)
+					.style("font-size", "11px")
+
+			});
+
+
+			var tubeFill_bottom = bulb_cy,
+				tubeFill_top = scale(currentTemp);
+
+			// Rect element for the red mercury column
+			svg.append("rect")
+				.attr("x", width / 2 - (tubeWidth - 10) / 2)
+				.attr("y", tubeFill_top)
+				.attr("width", tubeWidth - 10)
+				.attr("height", tubeFill_bottom - tubeFill_top)
+				.style("shape-rendering", "crispEdges")
+				.style("fill", mercuryColor)
+
+
+			// Main thermometer bulb fill
+			svg.append("circle")
+				.attr("r", bulbRadius - 6)
+				.attr("cx", bulb_cx)
+				.attr("cy", bulb_cy)
+				.style("fill", "url(#bulbGradient)")
+				.style("stroke", mercuryColor)
+				.style("stroke-width", "2px");
+
+
+			// Values to use along the scale ticks up the thermometer
+			var tickValues = d3.range((domain[1] - domain[0]) / step + 1).map(function (v) { return domain[0] + v * step; });
+
+
+			// D3 axis object for the temperature scale
+			var axis = d3.svg.axis()
+				.scale(scale)
+				.innerTickSize(7)
+				.outerTickSize(0)
+				.tickValues(tickValues)
+				.orient("left");
+
+			// Add the axis to the image
+			var svgAxis = svg.append("g")
+				.attr("id", "tempScale")
+				.attr("transform", "translate(" + (width / 2 - tubeWidth / 2) + ",0)")
+				.call(axis);
+
+			// Format text labels
+			svgAxis.selectAll(".tick text")
+				.style("fill", "#777777")
+				.style("font-size", "10px");
+
+			// Set main axis line to no stroke or fill
+			svgAxis.select("path")
+				.style("stroke", "none")
+				.style("fill", "none")
+
+			// Set the style of the ticks 
+			svgAxis.selectAll(".tick line")
+				.style("stroke", tubeBorderColor)
+				.style("shape-rendering", "crispEdges")
+				.style("stroke-width", "1px");
+		};
+
+		function getSoilMoisture(device) {
+			goGet("https://esell-iot.azurewebsites.net/api/TempCurrent?code=sbn2f9OucOTLKEHkXtah8T1JziSRaaZQIKOE59azJ3iVPoBoGRT6ig==&device=" + device).then(function (response) {
+				//console.log(response);
+				document.getElementById(device + "_name").innerHTML = response.deviceid;
+				// gauge.update(response.temp);
+				buildTherm(device, response.temp);
+				var localDate = new Date(response.utc);
+				document.getElementById(device + "_update").innerHTML = localDate.toDateString() + " " + localDate.getHours() + ":" + localDate.getMinutes();
+			})
+		}
+
+		getSoilMoisture("garage");
+		getSoilMoisture("porch");
+	</script>
+</body>
+
+</html>
